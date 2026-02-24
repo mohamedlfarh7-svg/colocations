@@ -6,22 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('colocation_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('colocation_id')->constrained()->onDelete('cascade');
+            
+            // Hna foreign key
+            $table->foreignId('colocation_id')
+                  ->constrained('colocations') // tsawb foreign key li katreferi 'colocations.id'
+                  ->onDelete('cascade');
+
             $table->string('image_path');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('colocation_images');
