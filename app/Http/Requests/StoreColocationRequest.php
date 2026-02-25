@@ -25,7 +25,7 @@ class StoreColocationRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric',
-            'address' => 'required|string|max:255',
+            'address' => 'required|string',
         ];
     }
 }

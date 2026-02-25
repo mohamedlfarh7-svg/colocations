@@ -8,18 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('colocations', function (Blueprint $table) {
+        Schema::create('invitations', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->decimal('price', 10, 2);
-            $table->string('address');
+            $table->foreignId('colocation_id')->constrained()->onDelete('cascade');
+            $table->string('email');
+            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('colocations');
+        Schema::dropIfExists('invitations');
     }
 };

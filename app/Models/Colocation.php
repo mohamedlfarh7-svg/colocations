@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Colocation extends Model
 {
-    protected $fillable = ['name', 'status'];
+    protected $fillable = ['title', 'description', 'price', 'address'];
 
     public function members(): BelongsToMany
     {

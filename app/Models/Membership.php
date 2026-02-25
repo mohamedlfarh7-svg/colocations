@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Membership extends Model
 {
+    protected $table = 'memberships';
+
     protected $fillable = [
         'user_id',
         'colocation_id',
