@@ -3,25 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Reservation extends Model
+class Membership extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'colocation_id',
-        'start_date',
-        'end_date',
+        'role',
+        'balance',
+        'left_at'
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function colocation()
+    public function colocation(): BelongsTo
     {
         return $this->belongsTo(Colocation::class);
     }
