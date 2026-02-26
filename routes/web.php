@@ -5,6 +5,7 @@ use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaymentController; // N'oublie pas l'import ici
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,7 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('colocations', ColocationController::class);
 
     Route::prefix('colocations/{colocation}')->group(function () {
-     
+        
         Route::post('/images', [ColocationController::class, 'uploadImage'])->name('colocations.images.store');
 
         Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
@@ -35,6 +36,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
         Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
+
+        // AJOUT ICI : La route pour enregistrer un remboursement
+        Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
     });
 });
 

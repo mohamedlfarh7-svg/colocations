@@ -47,7 +47,7 @@ class ColocationController extends Controller
     {
         $this->authorize('view', $colocation);
 
-        $colocation->load(['members', 'expenses.user']);
+        $colocation->load(['members', 'expenses.user', 'images', 'payments']);
 
         $totalExpenses = $colocation->expenses->sum('amount');
         $activeMembers = $colocation->members()->wherePivot('left_at', null)->get();
@@ -56,15 +56,35 @@ class ColocationController extends Controller
         $sharePerMember = $membersCount > 0 ? $totalExpenses / $membersCount : 0;
 
         $balances = $activeMembers->map(function ($member) use ($sharePerMember, $colocation) {
-            $paidByHim = $colocation->expenses->where('user_id', $member->id)->sum('amount');
+            $paidForExpenses = $colocation->expenses->where('user_id', $member->id)->sum('amount');
+            $sentPayments = $colocation->payments->where('from_user_id', $member->id)->sum('amount');
+            $receivedPayments = $colocation->payments->where('to_user_id', $member->id)->sum('amount');
+
             return [
                 'user' => $member,
-                'paid' => $paidByHim,
-                'balance' => $paidByHim - $sharePerMember,
+                'paid' => $paidForExpenses,
+                'balance' => ($paidForExpenses + $sentPayments) - ($sharePerMember + $receivedPayments),
             ];
         });
 
         return view('colocations.show', compact('colocation', 'balances', 'totalExpenses', 'sharePerMember'));
+    }
+
+    public function uploadImage(Request $request, Colocation $colocation)
+    {
+        $this->authorize('view', $colocation);
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('colocations', 'public');
+
+        $colocation->images()->create([
+            'path' => $path
+        ]);
+
+        return back()->with('success', 'Image ajoutée !');
     }
 
     public function edit(Colocation $colocation)

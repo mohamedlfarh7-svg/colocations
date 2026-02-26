@@ -1,27 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Models;
 
-use App\Models\Colocation;
-use App\Models\Payment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 
-class PaymentController extends Controller
+class Payment extends Model
 {
-    public function store(Request $request, Colocation $colocation)
+    protected $fillable = ['colocation_id', 'from_user_id', 'to_user_id', 'amount'];
+
+    public function colocation()
     {
-        $request->validate([
-            'to_user_id' => 'required|exists:users,id',
-            'amount' => 'required|numeric|min:0.01',
-        ]);
-
-        $colocation->payments()->create([
-            'from_user_id' => Auth::id(),
-            'to_user_id' => $request->to_user_id,
-            'amount' => $request->amount,
-        ]);
-
-        return back()->with('success', 'Remboursement enregistré !');
+        return $this->belongsTo(Colocation::class);
     }
 }

@@ -85,7 +85,7 @@
                     </div>
                 @empty
                     <div class="col-span-full py-8 text-center border border-dashed border-white/10 rounded-2xl">
-                        <p class="text-gray-600 text-sm">Aucune photo de l'appartement pour le moment.</p>
+                        <p class="text-gray-600 text-sm">Aucune photo pour le moment.</p>
                     </div>
                 @endforelse
             </div>
@@ -99,9 +99,9 @@
                         Membres & Équilibre
                     </h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         @foreach($balances as $item)
-                            <div class="bg-white/2 border border-white/5 p-5 rounded-2xl flex justify-between items-center hover:border-white/20 transition-all">
+                            <div class="bg-white/2 border border-white/5 p-5 rounded-2xl flex justify-between items-center">
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-xs font-bold border border-white/10 text-white shadow-lg uppercase">
                                         {{ substr($item['user']->name, 0, 2) }}
@@ -120,14 +120,31 @@
                             </div>
                         @endforeach
                     </div>
+
+                    <div class="pt-8 border-t border-white/5">
+                        <h4 class="text-sm font-bold text-white mb-4 uppercase tracking-widest">Régler une dette (Settle Up)</h4>
+                        <form action="{{ route('payments.store', $colocation) }}" method="POST" class="flex flex-wrap gap-3">
+                            @csrf
+                            <select name="to_user_id" class="flex-1 min-w-[200px] bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500 transition-all" required>
+                                <option value="" class="bg-[#0f0f0f]">Rembourser qui ?</option>
+                                @foreach($colocation->members->where('id', '!=', Auth::id()) as $member)
+                                    <option value="{{ $member->id }}" class="bg-[#0f0f0f]">{{ $member->name }}</option>
+                                @endforeach
+                            </select>
+                            <input type="number" name="amount" step="0.01" placeholder="Montant" class="w-32 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-green-500 transition-all" required>
+                            <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-green-600/20 cursor-pointer">
+                                Payer
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="bg-linear-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-lg shadow-blue-500/20 hover:scale-[1.01] transition-transform">
+                <div class="bg-linear-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-lg shadow-blue-500/20">
                     <div>
                         <h4 class="text-xl font-bold text-white">Gestion des Dépenses</h4>
-                        <p class="text-blue-100 text-sm">Ajoutez de nouveaux achats ou consultez l'historique complet.</p>
+                        <p class="text-blue-100 text-sm">Consultez l'historique ou ajoutez un achat.</p>
                     </div>
-                    <a href="{{ route('expenses.index', $colocation) }}" class="bg-white text-blue-600 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all cursor-pointer whitespace-nowrap">
+                    <a href="{{ route('expenses.index', $colocation) }}" class="bg-white text-blue-600 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all whitespace-nowrap">
                         Gérer les achats
                     </a>
                 </div>
@@ -140,9 +157,8 @@
                     <form action="{{ route('invitations.store', $colocation) }}" method="POST" class="space-y-4">
                         @csrf
                         <div>
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block tracking-widest">Email du nouveau membre</label>
-                            <input type="email" name="email" placeholder="coloc@exemple.com" 
-                                   class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all text-white placeholder-gray-700" required>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block tracking-widest">Email</label>
+                            <input type="email" name="email" placeholder="coloc@exemple.com" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all text-white placeholder-gray-700" required>
                         </div>
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-600/20 cursor-pointer">
                             Envoyer l'invitation
@@ -153,7 +169,7 @@
 
                 <div class="p-6 border border-white/5 bg-white/2 rounded-2xl text-center">
                     <p class="text-[10px] text-gray-500 italic uppercase tracking-widest">
-                        "Les bons comptes font <br> les bons colocs."
+                        "Les bons comptes font les bons colocs."
                     </p>
                 </div>
             </div>
