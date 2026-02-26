@@ -43,32 +43,32 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($colocations as $membership)
+            @forelse($colocations as $colocation)
                 <div class="group relative">
                     <div class="absolute -inset-0.5 bg-linear-to-r from-blue-500 to-indigo-600 rounded-2xl blur opacity-0 group-hover:opacity-20 transition duration-500"></div>
                     
                     <div class="relative bg-[#0f0f0f] border border-white/10 rounded-2xl p-6 flex flex-col h-full shadow-2xl">
                         <div class="flex justify-between items-start mb-4">
                             <span class="px-2 py-1 bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 uppercase tracking-tighter rounded">
-                                {{ $membership->role }}
+                                {{ $colocation->pivot->role ?? 'Membre' }}
                             </span>
-                            <span class="text-xs text-gray-600">ID: #00{{ $membership->colocation->id }}</span>
+                            <span class="text-xs text-gray-600">ID: #00{{ $colocation->id }}</span>
                         </div>
 
                         <h3 class="text-xl font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">
-                            {{ $membership->colocation->title }}
+                            {{ $colocation->name }}
                         </h3>
                         <p class="text-sm text-gray-500 mb-6 line-clamp-2">
-                            {{ $membership->colocation->address }}
+                            {{ $colocation->address }}
                         </p>
 
                         <div class="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
                             <div class="text-left">
                                 <p class="text-[10px] text-gray-600 uppercase font-bold">Loyer Total</p>
-                                <p class="text-sm font-semibold text-white">{{ number_format($membership->colocation->price, 2) }} DH</p>
+                                <p class="text-sm font-semibold text-white">{{ number_format($colocation->price, 2) }} DH</p>
                             </div>
                             
-                            <a href="{{ route('colocations.show', $membership->colocation) }}" 
+                            <a href="{{ route('colocations.show', $colocation) }}" 
                                class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-blue-600 hover:text-white transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -85,7 +85,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-medium text-white mb-2">Aucune colocation trouvée</h3>
-                    <p class="text-gray-500 max-w-xs mx-auto mb-8">Vous n'avez pas encore rejoint ou créé de colocation. Commencez dès maintenant !</p>
+                    <p class="text-gray-500 max-w-xs mx-auto mb-8">Vous n'avez pas encore rejoint ou créé de colocation.</p>
                     <a href="{{ route('colocations.create') }}" class="px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl transition-all">
                         Créer ma première colocation
                     </a>

@@ -25,6 +25,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('colocations', ColocationController::class);
 
     Route::prefix('colocations/{colocation}')->group(function () {
+     
+        Route::post('/images', [ColocationController::class, 'uploadImage'])->name('colocations.images.store');
+
         Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
         Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
         Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');

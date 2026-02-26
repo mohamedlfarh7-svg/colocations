@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -16,8 +14,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'reputation',
-        'banned_at',
     ];
 
     protected $hidden = [
@@ -30,23 +26,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'banned_at' => 'datetime',
         ];
     }
 
-    public function memberships(): HasMany
-    {
-        return $this->hasMany(Membership::class);
-    }
-
-    public function colocations(): BelongsToMany
+    public function colocations()
     {
         return $this->belongsToMany(Colocation::class, 'memberships')
-                    ->withPivot('role', 'left_at')
+                    ->withPivot('role', 'joined_at', 'left_at')
                     ->withTimestamps();
     }
 
-    public function expenses(): HasMany
+    public function expenses()
     {
         return $this->hasMany(Expense::class);
     }
