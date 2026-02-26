@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invitation;
 use App\Models\Colocation;
+use App\Models\User;
 use App\Mail\InvitationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,10 +31,18 @@ class InvitationController extends Controller
     public function accept(Invitation $invitation)
     {
         if (Auth::check()) {
-            if (Auth::user()->email !== $invitation->email) {
+            /** @var User $user */
+            $user = Auth::user();
+
+            if ($user->email !== $invitation->email) {
                 Auth::logout();
                 return redirect()->route('login')
                     ->with('info', 'Connectez-vous avec : ' . $invitation->email);
+            }
+
+            if ($user->colocations()->wherePivot('left_at', null)->exists()) {
+                return redirect()->route('colocations.index')
+                    ->with('error', 'Vous avez déjà une colocation active.');
             }
         } else {
             return redirect()->route('login')
@@ -43,7 +52,7 @@ class InvitationController extends Controller
         $colocation = $invitation->colocation;
 
         $colocation->members()->syncWithoutDetaching([
-            Auth::id() => ['role' => 'member']
+            $user->id => ['role' => 'member']
         ]);
 
         $invitation->delete();

@@ -29,28 +29,41 @@ class ColocationController extends Controller
 
     public function create()
     {
+        if (Auth::user()->colocations()->wherePivot('left_at', null)->exists()) {
+            return redirect()->route('colocations.index')
+                ->with('error', 'Vous devez quitter votre colocation actuelle avant d\'en créer une nouvelle.');
+        }
+
         return view('colocations.create');
     }
 
     public function store(StoreColocationRequest $request)
     {
-        $colocation = DB::transaction(function () use ($request) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->colocations()->wherePivot('left_at', null)->exists()) {
+            return redirect()->route('colocations.index')
+                ->with('error', 'Vous êtes déjà dans une colocation active.');
+        }
+
+        $colocation = DB::transaction(function () use ($request, $user) {
             $colocation = Colocation::create($request->validated());
-            $colocation->members()->attach(Auth::id(), ['role' => 'owner']);
+            $colocation->members()->attach($user->id, ['role' => 'owner']);
             return $colocation;
         });
 
-        return redirect()->route('colocations.show', $colocation);
+        return redirect()->route('colocations.show', $colocation)->with('success', 'Colocation créée !');
     }
 
     public function show(Colocation $colocation)
     {
         $this->authorize('view', $colocation);
 
-        $colocation->load(['members', 'expenses.user', 'images', 'payments']);
-
-        $totalExpenses = $colocation->expenses->sum('amount');
+        $colocation->load(['expenses.user', 'images', 'payments']);
+        
         $activeMembers = $colocation->members()->wherePivot('left_at', null)->get();
+        $totalExpenses = $colocation->expenses->sum('amount');
         $membersCount = $activeMembers->count();
         
         $sharePerMember = $membersCount > 0 ? $totalExpenses / $membersCount : 0;
@@ -68,6 +81,35 @@ class ColocationController extends Controller
         });
 
         return view('colocations.show', compact('colocation', 'balances', 'totalExpenses', 'sharePerMember'));
+    }
+
+    public function leave(Colocation $colocation)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $colocation->load(['expenses', 'payments', 'members']);
+        
+        $activeMembers = $colocation->members()->wherePivot('left_at', null)->get();
+        $totalExpenses = $colocation->expenses->sum('amount');
+        $membersCount = $activeMembers->count();
+        $sharePerMember = $membersCount > 0 ? $totalExpenses / $membersCount : 0;
+
+        $paid = $colocation->expenses->where('user_id', $user->id)->sum('amount');
+        $sent = $colocation->payments->where('from_user_id', $user->id)->sum('amount');
+        $received = $colocation->payments->where('to_user_id', $user->id)->sum('amount');
+        
+        $balance = ($paid + $sent) - ($sharePerMember + $received);
+
+        if ($balance < -1) {
+            $user->decrement('rating');
+        } else {
+            $user->increment('rating');
+        }
+
+        $colocation->members()->updateExistingPivot($user->id, ['left_at' => now()]);
+
+        return redirect()->route('colocations.index')->with('success', 'Vous avez quitté la colocation.');
     }
 
     public function uploadImage(Request $request, Colocation $colocation)
@@ -97,13 +139,13 @@ class ColocationController extends Controller
     {
         $this->authorize('update', $colocation);
         $colocation->update($request->validated());
-        return redirect()->route('colocations.show', $colocation);
+        return redirect()->route('colocations.show', $colocation)->with('success', 'Mise à jour réussie !');
     }
 
     public function destroy(Colocation $colocation)
     {
         $this->authorize('update', $colocation);
         $colocation->delete();
-        return redirect()->route('colocations.index');
+        return redirect()->route('colocations.index')->with('success', 'Colocation supprimée.');
     }
 }
