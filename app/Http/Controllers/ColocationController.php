@@ -42,7 +42,7 @@ class ColocationController extends Controller
 
     public function show(Colocation $colocation)
     {
-        $colocation->load(['members', 'expenses.category']);
+        $colocation->load(['members', 'expenses.user']);
 
         $totalExpenses = $colocation->expenses->sum('amount');
         $activeMembersCount = $colocation->members()->whereNull('left_at')->count();

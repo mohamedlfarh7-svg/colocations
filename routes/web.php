@@ -3,39 +3,36 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\InvitationController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth', 'check.banned'])->group(function () {
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-    Route::get('/dashboard', function () {
-        return redirect()->route('colocations.index');
-    })->name('dashboard');
+Route::get('/invitations/{invitation}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
+Route::get('/invitations/{invitation}/reject', [InvitationController::class, 'reject'])->name('invitations.reject');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('colocations', ColocationController::class);
-    
-    Route::post('colocations/{colocation}/cancel', [ColocationController::class, 'cancel'])->name('colocations.cancel');
 
-    Route::post('colocations/{colocation}/invite', [InvitationController::class, 'store'])->name('invitations.store');
-    Route::post('invitations/{invitation}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
-    Route::post('invitations/{invitation}/reject', [InvitationController::class, 'reject'])->name('invitations.reject');
+    Route::prefix('colocations/{colocation}')->group(function () {
+        Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+        Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+        Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
+        Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+        Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
-    Route::resource('expenses', ExpenseController::class);
-
-    Route::middleware(['can:admin-access'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        Route::post('/users/{user}/toggle-ban', [AdminController::class, 'toggleBan'])->name('users.toggle-ban');
+        Route::post('/invitations', [InvitationController::class, 'store'])->name('invitations.store');
     });
 });
-
-Route::post('/logout', function () {
-    Auth::logout();
-    return redirect('/');
-})->name('logout');
 
 require __DIR__.'/auth.php';

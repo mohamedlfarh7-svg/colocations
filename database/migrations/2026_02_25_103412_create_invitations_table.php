@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('colocation_id')->constrained()->onDelete('cascade');
             $table->string('email');
-            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
+            $table->string('token')->unique();
             $table->timestamps();
         });
     }

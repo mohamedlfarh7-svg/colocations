@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\Invitation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -13,26 +13,22 @@ class InvitationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct(public $colocation) {}
+    public function __construct(public Invitation $invitation) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Invitation à rejoindre une colocation');
+        return new Envelope(
+            subject: 'Invitation à rejoindre la colocation: ' . $this->invitation->colocation->title,
+        );
     }
 
     public function content(): Content
     {
-        return new Content(view: 'emails.invitation'); 
+        return new Content(
+            view: 'emails.invitation',
+        );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

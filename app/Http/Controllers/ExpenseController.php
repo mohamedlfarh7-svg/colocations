@@ -3,57 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
-use App\Models\Category;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\Colocation;
+use App\Http\Requests\ExpenseRequest;
 use Illuminate\Support\Facades\Auth;
 
 class ExpenseController extends Controller
 {
-    public function index(Request $request)
+    private $categories = ['Alimentation', 'Loyer', 'Transport', 'Divertissement', 'Autres'];
+
+    public function index(Colocation $colocation)
     {
-        /** @var User $user */
-        $user = Auth::user();
-        $colocation = $user->colocations()->wherePivot('left_at', null)->first();
-
-        if (!$colocation) {
-            return redirect()->route('colocations.index');
-        }
-
-        $query = Expense::where('colocation_id', $colocation->id);
-
-        if ($request->filled('month')) {
-            $query->whereMonth('date', $request->month);
-        }
-
-        $expenses = $query->with(['category', 'user'])->latest()->get();
-        $categories = Category::all();
-
-        return view('expenses.index', compact('expenses', 'categories'));
+        $expenses = $colocation->expenses()->with('user')->latest()->get();
+        $categories = $this->categories;
+        return view('expenses.index', compact('colocation', 'expenses', 'categories'));
     }
 
-    public function store(Request $request)
+    public function store(ExpenseRequest $request, Colocation $colocation)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'date' => 'required|date',
-        ]);
+        $colocation->expenses()->create(array_merge($request->validated(), [
+            'user_id' => Auth::id(),
+            'date' => now(),
+        ]));
 
-        /** @var User $user */
-        $user = Auth::user();
-        $colocation = $user->colocations()->wherePivot('left_at', null)->first();
+        return redirect()->route('expenses.index', $colocation)->with('success', 'Ajouté !');
+    }
 
-        Expense::create([
-            'title' => $validated['title'],
-            'amount' => $validated['amount'],
-            'category_id' => $validated['category_id'],
-            'date' => $validated['date'],
-            'user_id' => $user->id,
-            'colocation_id' => $colocation->id,
-        ]);
+    public function update(ExpenseRequest $request, Colocation $colocation, Expense $expense)
+    {
+        $expense->update($request->validated());
+        return redirect()->route('expenses.index', $colocation)->with('success', 'Modifié !');
+    }
 
-        return back();
+    public function destroy(Colocation $colocation, Expense $expense)
+    {
+        $expense->delete();
+        return redirect()->route('expenses.index', $colocation)->with('success', 'Supprimé !');
     }
 }
