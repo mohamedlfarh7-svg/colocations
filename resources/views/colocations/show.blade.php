@@ -24,12 +24,14 @@
             </a>
             <div class="flex items-center gap-4">
                 @can('update', $colocation)
+                    <span class="text-[8px] font-black text-gray-600 uppercase tracking-widest border border-white/5 px-2 py-1 rounded">Admin Mode</span>
                     <a href="{{ route('colocations.edit', $colocation) }}" class="text-[10px] font-bold text-blue-500/80 hover:text-blue-400 uppercase tracking-[0.2em]">Modifier</a>
+                @else
+                    <form action="{{ route('colocations.leave', $colocation) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment quitter cette colocation ?')">
+                        @csrf
+                        <button type="submit" class="text-[10px] font-bold text-red-500/80 hover:text-red-400 uppercase tracking-[0.2em] cursor-pointer italic">Quitter</button>
+                    </form>
                 @endcan
-                <form action="{{ route('colocations.leave', $colocation) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment quitter cette colocation ? Votre réputation sera mise à jour.')">
-                    @csrf
-                    <button type="submit" class="text-[10px] font-bold text-red-500/80 hover:text-red-400 uppercase tracking-[0.2em] cursor-pointer italic">Quitter</button>
-                </form>
             </div>
         </div>
     </nav>

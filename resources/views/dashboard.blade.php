@@ -34,7 +34,7 @@
         
         <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white">Bonjour, {{ Auth::user()->name }} 👋</h1>
+                <h1 class="text-3xl font-bold text-white">Bonjour, {{ Auth::user()->name }} </h1>
                 <p class="text-gray-500">Gérez votre logement et surveillez votre réputation.</p>
             </div>
             
